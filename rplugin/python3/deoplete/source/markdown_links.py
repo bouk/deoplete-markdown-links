@@ -17,7 +17,7 @@ class Source(Base):
         self.filetypes = ['markdown']
         self.min_pattern_length = 0
         self.matcher_key = 'name'
-        self.__pattern = re.compile(r'\[\[^\]*(?!\]\])$')
+        self.__pattern = re.compile(r'\[\[[^\]]*(?!\]\])$')
 
     def get_complete_position(self, context: UserContext) -> int:
         match = self.__pattern.search(context['input'])
