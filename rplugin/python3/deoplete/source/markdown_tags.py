@@ -1,6 +1,7 @@
 import re
 
 import subprocess
+from collections import Counter
 from os.path import dirname, join
 from deoplete.base.source import Base
 from deoplete.util import Nvim, UserContext, Candidates
@@ -24,6 +25,7 @@ class Source(Base):
     def gather_candidates(self, context: UserContext) -> Candidates:
         directory = dirname(join(context['cwd'], context['bufname']))
         result = subprocess.run(["rg", "--only-matching", "--no-filename", "--no-line-number", r'#[\w\-]{3,}', "-t", "md"], cwd=directory, capture_output=True, encoding='utf-8')
-        words = result.stdout.split('\n')
-        result = [{'word': x[1:]} for x in words if len(x) > 0]
+
+        result = [{'word': tag[1:], 'kind': str(count)}
+                for (tag, count) in Counter(result.stdout.split('\n')[:-1]).most_common()]
         return result
