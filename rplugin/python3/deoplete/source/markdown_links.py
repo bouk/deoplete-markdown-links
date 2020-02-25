@@ -16,8 +16,11 @@ class Source(Base):
         self.matchers = ['matcher_full_fuzzy']
         self.filetypes = ['markdown']
         self.min_pattern_length = 0
-        self.matcher_key = 'name'
         self.__pattern = re.compile(r'\[\[[^\]]*(?!\]\])$')
+
+    def on_init(self, context: UserContext):
+        if 'deoplete#sources#markdown_links#name_pattern' in context['vars']:
+            self.__name_pattern = re.compile(context['vars']['deoplete#sources#markdown_links#name_pattern'])
 
     def get_complete_position(self, context: UserContext) -> int:
         match = self.__pattern.search(context['input'])
@@ -27,5 +30,14 @@ class Source(Base):
         directory = dirname(join(context['cwd'], context['bufname']))
         result = subprocess.run(["rg", "--files", "-t", "md"], cwd=directory, capture_output=True, encoding='utf-8')
         words = result.stdout.split('\n')
-        result = [{'word': x + ']]', 'name': x, 'abbr': x} for x in words if len(x) > 0]
+        def transform(x):
+            try:
+                match = self.__name_pattern.search(x)
+                abbr = match['name']
+            except IndexError:
+                abbr = match[0]
+            except:
+                abbr = x
+            return {'word': x + ']]', 'abbr': abbr}
+        result = [transform(x) for x in words if len(x) > 0]
         return result
