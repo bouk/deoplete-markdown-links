@@ -16,6 +16,7 @@ class Source(Base):
         self.matchers = ['matcher_full_fuzzy']
         self.filetypes = ['markdown']
         self.min_pattern_length = 0
+        self.matcher_key = 'abbr'
         self.__pattern = re.compile(r'\[\[[^\]]*(?!\]\])$')
 
     def on_init(self, context: UserContext):
